@@ -2,7 +2,15 @@
 
 Servicio de **persistencia** de OnixGuard. Escrito en **Go**. Consume `onix.clean.*` y escribe en **PostgreSQL** (inserts por lote). También materializa métricas/agregados.
 
-> **Estado:** se construye en **Fase 1–2**. En Fase 1 va combinado con el ingestor (consume `raw` directo); en Fase 2 se separa y consume `clean`. Este README documenta su diseño.
+> **Estado (Fase 2 ✅):** implementado y separado. Consume `onix.clean.*` (consumidor durable `onix-recorder`), auto-registra `project`/`agent`/`session` e inserta `events` + `tool_calls` + `credentials_detected` (**solo el hash**) en una transacción. Expone `/healthz`. Requiere `DATABASE_URL`.
+
+## Estructura
+```text
+cmd/onix-recorder/main.go     # health + arranque del consumidor
+internal/consumer/            # suscripción NATS a onix.clean.*
+internal/store/               # persistencia (pgx) con auto-registro y tx
+Dockerfile                    # multi-stage (golang:1.26 → distroless)
+```
 
 ---
 
